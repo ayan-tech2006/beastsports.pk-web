@@ -1,0 +1,140 @@
+.animated-navbar {
+  font-size: 12px;
+  letter-spacing: .4px;
+}
+
+.navbar-toggle {
+  display: none;
+}
+
+.navbar-trigger:hover,
+.navbar-trigger.is-highlighted {
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.navbar-link {
+  padding-inline: 20px;
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+.navbar-trigger:has(.navbar-disclosure) .navbar-link {
+  padding-right: 4px;
+}
+
+.navbar-disclosure {
+  display: grid;
+  place-items: center;
+  padding: 12px 14px 12px 8px;
+  min-height: 44px;
+  min-width: 44px;
+  background: transparent;
+}
+
+.navbar-disclosure svg {
+  transition: transform 200ms ease;
+}
+
+.navbar-disclosure[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+
+.navbar-cursor {
+  left: 0;
+  bottom: -4px;
+  pointer-events: none;
+}
+
+.navbar-dropdown-bridge {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  padding-top: 12px;
+  width: 256px;
+  z-index: 1;
+}
+
+.navbar-dropdown {
+  padding: 8px;
+  transform-origin: top left;
+  letter-spacing: 0;
+}
+
+.navbar-dropdown-heading {
+  padding: 12px 16px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.navbar-dropdown-link {
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .animated-navbar {
+    position: static;
+  }
+
+  .navbar-toggle {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    background: transparent;
+  }
+
+  .navbar-list {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: calc(100dvh - 96px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 16px 24px 24px;
+    background: var(--color-espresso);
+    color: var(--color-ivory);
+    border-top: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+  }
+
+  .navbar-list[data-open='true'] {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+
+  .navbar-trigger {
+    width: 100%;
+  }
+
+  .navbar-link {
+    flex: 1;
+    justify-content: flex-start;
+    padding: 14px 16px;
+  }
+
+  .navbar-disclosure {
+    min-width: 44px;
+    padding: 14px;
+  }
+
+  .navbar-dropdown-bridge {
+    position: static;
+    width: 100%;
+    padding: 8px 0;
+  }
+
+  .navbar-dropdown {
+    transform-origin: top center;
+    box-shadow: none;
+  }
+
+  .navbar-dropdown-link {
+    min-height: 44px;
+  }
+}

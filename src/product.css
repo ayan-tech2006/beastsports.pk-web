@@ -1,0 +1,149 @@
+@reference "./index.css";
+
+.pdp-page {
+  background: var(--store-paper);
+}
+
+.pdp-announcement {
+  @apply border-b border-espresso/10 bg-parchment px-5 py-2 text-xs text-espresso;
+}
+
+.pdp-header-actions {
+  @apply relative grid size-11 shrink-0 place-items-center;
+}
+
+.pdp-header-count {
+  @apply absolute top-0 right-0 grid min-w-4 place-items-center rounded-full bg-ivory px-1 text-xs leading-4 text-espresso;
+}
+
+.pdp-page .pdp-thumbnail {
+  @apply relative aspect-3/4 w-full overflow-hidden rounded-md border-2 border-transparent bg-parchment;
+}
+
+.pdp-page .pdp-thumbnail[aria-selected="true"] {
+  @apply border-espresso;
+}
+
+.pdp-page .pdp-next-view {
+  @apply grid size-10 place-items-center rounded-full border border-espresso/15;
+}
+
+.pdp-gallery-frame {
+  @apply relative aspect-3/4 max-h-176 overflow-hidden rounded-lg bg-parchment;
+}
+
+.pdp-gallery-photo {
+  @apply h-full w-full object-cover transition-transform duration-500;
+  filter: saturate(.65);
+}
+
+.pdp-view-full {
+  object-position: center 45%;
+}
+
+.pdp-view-close {
+  transform: scale(1.7);
+  transform-origin: 50% 32%;
+}
+
+.pdp-view-texture {
+  transform: scale(2.65);
+  transform-origin: 60% 58%;
+}
+
+.pdp-view-detail {
+  transform: scale(1.8);
+  transform-origin: 50% 90%;
+}
+
+.pdp-page .pdp-zoom-trigger {
+  @apply absolute right-4 bottom-4 grid size-11 place-items-center rounded-full bg-ivory text-espresso shadow-sm;
+}
+
+.pdp-page .pdp-color-choice {
+  @apply grid size-11 place-items-center rounded-full border border-transparent;
+}
+
+.pdp-page .pdp-color-choice[aria-pressed="true"] {
+  @apply border-espresso;
+}
+
+.pdp-color-chip {
+  @apply block size-8 rounded-full border border-espresso/10;
+}
+
+.pdp-page .pdp-size-choice {
+  @apply min-h-11 min-w-12 rounded-md border border-espresso/20 px-3 text-xs transition-colors;
+}
+
+.pdp-page .pdp-size-choice[aria-pressed="true"] {
+  @apply border-espresso bg-espresso text-ivory;
+}
+
+.storefront .pdp-page .pdp-add-button {
+  @apply min-h-14 w-full justify-center gap-3 rounded-lg text-sm;
+}
+
+.pdp-page .pdp-wishlist {
+  @apply grid min-h-14 w-14 shrink-0 place-items-center rounded-lg border border-espresso/20;
+}
+
+.pdp-page .pdp-wishlist[aria-pressed="true"] {
+  @apply text-clay;
+}
+
+.pdp-page .pdp-trust-item {
+  @apply flex min-w-0 flex-col items-center gap-2 text-center sm:flex-row sm:items-start sm:text-left;
+}
+
+.pdp-trust-item > svg {
+  @apply shrink-0;
+}
+
+.pdp-trust-item strong {
+  @apply block text-xs font-medium leading-relaxed;
+}
+
+.pdp-trust-item span span {
+  @apply mt-1 block text-xs leading-relaxed text-clay;
+}
+
+.pdp-tab-list {
+  @apply flex gap-5 overflow-x-auto border-b border-espresso/15;
+  scrollbar-width: none;
+}
+
+.pdp-page .pdp-tab {
+  @apply min-h-12 shrink-0 border-b-2 border-transparent text-xs text-clay;
+}
+
+.pdp-page .pdp-tab[aria-selected="true"] {
+  @apply border-espresso font-medium text-espresso;
+}
+
+.pdp-page .pdp-detail-photo {
+  @apply block aspect-3/2 w-full overflow-hidden rounded-lg bg-parchment;
+}
+
+.pdp-lightbox {
+  @apply fixed inset-0 m-auto w-full max-w-4xl overflow-hidden rounded-lg border-0 bg-ivory p-0 text-espresso backdrop:bg-espresso/70;
+  max-height: calc(100dvh - var(--spacing) * 8);
+  max-width: min(var(--container-4xl), calc(100vw - var(--spacing) * 8));
+}
+
+.pdp-page .pdp-lightbox-image {
+  @apply relative block w-full overflow-hidden bg-parchment;
+  height: min(75dvh, calc(var(--spacing) * 160));
+}
+
+.pdp-lightbox-image.is-zoomed img {
+  scale: 1.5;
+}
+
+.pdp-lightbox-hint {
+  @apply absolute right-4 bottom-4 grid size-11 place-items-center rounded-full bg-ivory;
+}
+
+body:has(.pdp-lightbox[open]) {
+  overflow: hidden;
+}

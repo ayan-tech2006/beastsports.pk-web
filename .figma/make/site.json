@@ -1,0 +1,14 @@
+{
+  "description": "Shop premium sports gear, apparel, and accessories across cricket, football, training, and running collections, with curated arrivals, best sellers, and seasonal deals.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  },
+  "title": "BeastSports | Premium Sports Gear",
+  "icons": {
+    "icon": "/beastsports-icon.svg"
+  }
+}

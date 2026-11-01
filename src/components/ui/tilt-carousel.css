@@ -1,0 +1,74 @@
+.tilt-section { background: transparent; padding: 12px 0 28px; }
+.tilt-carousel {
+  position: relative; width: 100%; max-width: 1200px; margin: 0 auto;
+  overflow: hidden; touch-action: pan-y pinch-zoom; user-select: none; cursor: grab;
+}
+.tilt-carousel:active { cursor: grabbing; }
+.tilt-card {
+  position: absolute; top: 50%; left: 50%;
+  width: var(--w); aspect-ratio: 2 / 3;
+  border-radius: 18px; overflow: hidden; will-change: transform;
+}
+.tilt-card img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+
+.tilt-carousel:focus-visible {
+  outline: 2px solid var(--color-clay);
+  outline-offset: -4px;
+}
+
+.tilt-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 40px 0;
+}
+
+.tilt-help {
+  font-size: 10px;
+  letter-spacing: 1.2px;
+}
+
+.tilt-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tilt-position {
+  margin-right: 12px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tilt-position > span {
+  color: var(--color-clay);
+}
+
+.tilt-actions button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--color-canvas);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-espresso);
+}
+
+.tilt-actions button:hover,
+.tilt-actions button[data-paused="true"] {
+  background: var(--color-espresso);
+  color: var(--color-ivory);
+}
+
+@media (max-width: 700px) {
+  .tilt-toolbar {
+    padding-inline: 24px;
+    justify-content: center;
+  }
+
+  .tilt-help {
+    display: none;
+  }
+}
