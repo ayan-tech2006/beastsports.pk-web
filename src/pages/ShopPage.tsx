@@ -28,7 +28,7 @@ const edits = [
   { value: "featured", label: "Best sellers" },
   { value: "sale", label: "The sale edit" },
 ]
-const PAGE_SIZE = 6
+const PAGE_SIZE = 12
 const recommendationOrder = [
   "training-pack",
   "velocity-shoes",
@@ -680,7 +680,7 @@ export default function ShopPage() {
             )}
             {results.length > 0 && (
               <nav
-                className="mt-10 flex items-center justify-between gap-3 border-t border-espresso/10 pt-5"
+                className="mt-10 flex items-center justify-between gap-2 sm:gap-3 border-t border-espresso/10 pt-5"
                 aria-label="Product pagination"
               >
                 <button
@@ -690,13 +690,19 @@ export default function ShopPage() {
                   onClick={() => changePage(currentPage - 1)}
                 >
                   <ArrowLeft size={14} strokeWidth={1.5} />
-                  <span>Previous</span>
+                  <span className="max-sm:sr-only">Previous</span>
                 </button>
-                <div className="flex items-center gap-2">
-                  {Array.from(
-                    { length: totalPages },
-                    (_, index) => index + 1,
-                  ).map((page) => (
+                <div className="flex items-center gap-1 sm:gap-2">
+                  {/* First, last and the pages around the current one, so the row fits on a phone. */}
+                  {[...new Set([1, currentPage - 1, currentPage, currentPage + 1, totalPages])]
+                    .filter((page) => page >= 1 && page <= totalPages)
+                    .sort((a, b) => a - b)
+                    .flatMap((page, index, pages) =>
+                      index > 0 && page - pages[index - 1] > 1 ? [-page, page] : [page],
+                    )
+                    .map((page) => page < 0 ? (
+                    <span key={page} className="text-xs text-espresso/50" aria-hidden="true">…</span>
+                  ) : (
                     <button
                       className="shop-page-number"
                       key={page}
@@ -715,7 +721,7 @@ export default function ShopPage() {
                   disabled={currentPage === totalPages}
                   onClick={() => changePage(currentPage + 1)}
                 >
-                  <span>Next</span>
+                  <span className="max-sm:sr-only">Next</span>
                   <ArrowRight size={14} strokeWidth={1.5} />
                 </button>
               </nav>
