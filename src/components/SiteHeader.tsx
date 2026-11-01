@@ -71,6 +71,7 @@ export default function SiteHeader({
             aria-label="BeastSports home"
             onClick={() => setMenuOpen(false)}
           >
+            <img className="wordmark-logo" src="/logo-mark.png" alt="" width={32} height={32} />
             BEASTSPORTS<span>®</span>
           </Link>
           <NavBarDemo mobileOpen={menuOpen} onMobileOpenChange={setMenuOpen} />

@@ -885,6 +885,7 @@ export default function Storefront() {
           <div className="store-footer-top">
             <div className="footer-brand">
               <Link className="wordmark" to="/">
+                <img className="wordmark-logo" src="/logo-mark.png" alt="" width={32} height={32} />
                 BEASTSPORTS<span>®</span>
               </Link>
               <p>

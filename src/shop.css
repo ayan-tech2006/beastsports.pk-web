@@ -39,6 +39,10 @@
   @apply ml-2 border-l border-espresso/15 pl-4;
 }
 
+.shop-category-grandchild {
+  @apply ml-6 border-l border-espresso/15 pl-4;
+}
+
 .shop-category-total {
   @apply ml-auto rounded-sm bg-espresso px-1.5 py-0.5 text-ivory tabular-nums;
 }

@@ -12,15 +12,27 @@ import {
   X,
 } from "lucide-react"
 import type { Product, StorefrontContext } from "@/Storefront"
-import { money } from "@/data/products"
+import { allProducts, collectionRoots, collectionsById, money } from "@/data/products"
 import "../shop.css"
 
-const categories = [
-  { value: "all", label: "All products" },
-  { value: "men", label: "Men" },
-  { value: "women", label: "Women" },
-  { value: "equipment", label: "Equipment" },
-  { value: "accessories", label: "Accessories" },
+// The category filter is the admin's collection tree. Catch-alls like "All Product" are skipped,
+// the same way the home page does; a collection's sub-collections open when it is chosen.
+const shopRoots = collectionRoots.filter((c) => c.products.length < allProducts.length * 0.9)
+const collectionMembers = new Map(
+  [...collectionsById].map(([id, c]) => [id, new Set(c.products.map((p) => p.id))]),
+)
+const inCategory = (productId: string, category: string) =>
+  category === "all" || Boolean(collectionMembers.get(category)?.has(productId))
+const categoryLabel = (category: string) =>
+  category === "all" ? "All products" : (collectionsById.get(category)?.name ?? "")
+const categoryOptions = (active: string) => [
+  { value: "all", depth: 0 },
+  ...shopRoots.flatMap((root) => [
+    { value: root.id, depth: 1 },
+    ...(active === root.id || root.children.some((child) => child.id === active)
+      ? root.children.map((child) => ({ value: child.id, depth: 2 }))
+      : []),
+  ]),
 ]
 const edits = [
   { value: "all", label: "Shop all" },
@@ -115,18 +127,18 @@ function FilterPanel({
       <fieldset>
         <legend className="sr-only">Product category</legend>
         <div className="space-y-1">
-          {categories.map((category) => {
-            const count = products.filter(
-              (product) =>
-                category.value === "all" ||
-                product.category.toLowerCase() === category.value,
+          {categoryOptions(filters.category).map((category) => {
+            const count = products.filter((product) =>
+              inCategory(product.id, category.value),
             ).length
             return (
               <label
                 className={`shop-category-option ${
-                  category.value === "all"
+                  category.depth === 0
                     ? "shop-category-root"
-                    : "shop-category-child"
+                    : category.depth === 1
+                      ? "shop-category-child"
+                      : "shop-category-grandchild"
                 }`}
                 key={category.value}
               >
@@ -145,7 +157,7 @@ function FilterPanel({
                       : "text-clay"
                   }
                 >
-                  {category.label}
+                  {categoryLabel(category.value)}
                 </span>
                 <span
                   className={
@@ -307,9 +319,7 @@ export default function ShopPage() {
   const edit = params.get("edit") ?? "all"
   const price = Number(params.get("price") ?? maxPrice)
   const filters: Filters = {
-    category: categories.some((item) => item.value === category)
-      ? category
-      : "all",
+    category: category === "all" || collectionsById.has(category) ? category : "all",
     edit: edits.some((item) => item.value === edit) ? edit : "all",
     search: params.get("q") ?? "",
     sizes: [...new Set(params.getAll("size"))].filter((size) =>
@@ -365,8 +375,7 @@ export default function ShopPage() {
       const searchable =
         `${product.name} ${product.type} ${product.category} ${product.description}`.toLowerCase()
       return (
-        (filters.category === "all" ||
-          product.category.toLowerCase() === filters.category) &&
+        inCategory(product.id, filters.category) &&
         (filters.edit === "all" ||
           (filters.edit === "new" && product.badge === "NEW") ||
           (filters.edit === "featured" && product.badge === "BEST SELLER") ||
@@ -594,10 +603,7 @@ export default function ShopPage() {
                     type="button"
                     onClick={() => update("category", "all")}
                   >
-                    {
-                      categories.find((item) => item.value === filters.category)
-                        ?.label
-                    }
+                    {categoryLabel(filters.category)}
                     <X size={12} />
                     <span className="sr-only">Remove category filter</span>
                   </button>

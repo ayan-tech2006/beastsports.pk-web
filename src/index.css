@@ -172,6 +172,15 @@
   letter-spacing: 1.4px;
 }
 
+/* BEAST logo mark next to the name; the white tile keeps the black letters visible on the dark header. */
+.wordmark-logo {
+  width: 32px;
+  height: 32px;
+  margin-right: 10px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
 .wordmark span {
   font-size: 8px;
   position: relative;
