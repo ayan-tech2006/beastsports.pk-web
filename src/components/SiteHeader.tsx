@@ -95,6 +95,7 @@ export default function SiteHeader({
               className="relative grid size-10 shrink-0 place-items-center text-inherit hover:opacity-80 transition-opacity"
               type="button"
               onClick={onOpenBag}
+              data-cart-target
               aria-label={`Open shopping bag, ${bagCount} ${
                 bagCount === 1 ? "item" : "items"
               }`}

@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router"
 import BatHero from "@/components/BatHero"
+import BatRack from "@/components/BatRack"
+import ClothingRail from "@/components/ClothingRail"
 import TiltCarousel, {
   type TiltCarouselImage,
 } from "@/components/ui/tilt-carousel"
@@ -44,6 +46,8 @@ export default function HomePage() {
           <TiltCarousel images={collectionImages} onOpen={navigate} />
         )}
       </section>
+      <ClothingRail />
+      <BatRack />
     </>
   )
 }

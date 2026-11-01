@@ -243,17 +243,25 @@ export type HeroSlide = {
 }
 export type FeatureCard = { eyebrow: string; title: string; image: string; collectionId: string }
 export type WebDeal = { productId: string; title: string; endsAt: string }
+// Clothing rail entries, keyed by product id; set in the admin's product form.
+export type RailEntry = { on: boolean; front: string; back: string }
+// 3D bat rack entries, keyed by product id; the type decides how edges and toe are drawn.
+export type BatEntry = { on: boolean; type: "hardball" | "holes" | "plain"; front: string; back: string }
 
 export const homeContent: {
   heroSlides: HeroSlide[]
   featureCards: FeatureCard[]
   deal: WebDeal | null
-} = { heroSlides: [], featureCards: [], deal: null }
+  rail: Record<string, RailEntry>
+  bats: Record<string, BatEntry>
+} = { heroSlides: [], featureCards: [], deal: null, rail: {}, bats: {} }
 
 const HOME_KEYS = {
   hero: "web_hero_slides_json",
   cards: "web_feature_cards_json",
   deal: "web_deal_json",
+  rail: "web_rail_json",
+  bats: "web_bat_rack_json",
 }
 
 function parseSetting<T>(rows: { key: string; value: string | null }[], key: string, fallback: T): T {
@@ -299,4 +307,6 @@ export async function loadProducts() {
     (card) => card?.image && card.title && collectionsById.has(card.collectionId),
   )
   homeContent.deal = parseSetting<WebDeal | null>(settings, HOME_KEYS.deal, null)
+  homeContent.rail = parseSetting<Record<string, RailEntry>>(settings, HOME_KEYS.rail, {})
+  homeContent.bats = parseSetting<Record<string, BatEntry>>(settings, HOME_KEYS.bats, {})
 }

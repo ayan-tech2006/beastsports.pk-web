@@ -8,6 +8,7 @@ import {
 import { Link, Outlet, useLocation } from "react-router"
 import TimedDeal from "@/components/ui/timed-deal"
 import StockNote from "@/components/StockNote"
+import { flyToCart } from "@/lib/fly-to-cart"
 import SiteHeader from "@/components/SiteHeader"
 import { getProductDetails } from "@/lib/product-details"
 import { useScrollReveal } from "@/lib/reveal"
@@ -433,6 +434,7 @@ export default function Storefront() {
     const chosenSize = size || selectedSize || (product.sizes.includes("M") ? "M" : product.sizes[0])
     addBagItems([{ id: product.id, size: chosenSize, color, quantity: 1 }])
     productDialog.current?.close()
+    flyToCart(image(product.image))
     setNotice(`${product.name} added to your bag.`)
   }
 
@@ -454,13 +456,15 @@ export default function Storefront() {
   }
 
   function addKitToBag() {
+    const adding = kitProducts.filter((product) => roomFor(product.id, bag) > 0)
     addBagItems(
-      kitProducts.filter((product) => roomFor(product.id, bag) > 0).map((product) => ({
+      adding.map((product) => ({
         id: product.id,
         size: product.sizes.includes(kitSize) ? kitSize : product.sizes[0],
         quantity: 1,
       })),
     )
+    adding.forEach((product, i) => setTimeout(() => flyToCart(image(product.image)), i * 140))
     setNotice(`All ${kitProducts.length} kit items added to your bag.`)
   }
 
