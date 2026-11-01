@@ -299,14 +299,21 @@ export default function TiltCarousel({ images, onOpen }: TiltCarouselProps) {
               draggable={false}
               loading="lazy"
             />
+            {/* A dark fade behind the name keeps it readable on white product photos. */}
             {image.label && (
-              <span className="pointer-events-none invisible absolute inset-x-2 bottom-1/6 text-center font-editorial text-lg font-medium leading-none tracking-tight text-ivory drop-shadow-md drop-shadow-espresso/80 group-data-[centered]:visible sm:text-3xl lg:text-4xl">
+              <span className="pointer-events-none invisible absolute inset-x-0 bottom-0 bg-linear-to-t from-espresso/85 via-espresso/40 to-transparent px-3 pt-[45%] pb-[14%] text-center font-editorial text-3xl font-medium leading-none tracking-tight text-ivory group-data-[centered]:visible max-sm:hidden lg:text-4xl">
                 {image.label}
               </span>
             )}
           </div>
         ))}
       </div>
+      {/* Phones: the centered collection's name sits under the cards instead of on them. */}
+      {images[activeIndex]?.label && (
+        <p className="mt-4 px-6 text-center font-editorial text-3xl leading-tight font-medium tracking-tight text-espresso sm:hidden" aria-live="polite">
+          {images[activeIndex].label}
+        </p>
+      )}
     </section>
   )
 }
