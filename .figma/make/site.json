@@ -1,7 +1,7 @@
 {
-  "description": "Shop premium sports gear, apparel, and accessories across cricket, football, training, and running collections, with curated arrivals, best sellers, and seasonal deals.",
+  "description": "Shop cricket bats, bat deals, balls, protective gear, badminton, fitness gear and shoes from BeastSports. Delivery across Pakistan by TCS and Post Office, with Cash on Delivery.",
   "robots": {
-    "index": false
+    "index": true
   },
   "accessibility": {
     "addBypassLinks": false,
