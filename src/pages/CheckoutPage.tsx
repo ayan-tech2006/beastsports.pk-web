@@ -13,7 +13,7 @@ import type {
   PaymentMethod,
   StorefrontContext,
 } from "@/Storefront"
-import { deliveryCharge, getProductImageUrl, money } from "@/data/products"
+import { deliveryCharge, findProduct, getProductImageUrl, money, type CustomShirt } from "@/data/products"
 import { supabase } from "@/lib/supabase"
 
 const agencies: DeliveryAgency[] = ["Post Office", "TCS"]
@@ -54,12 +54,16 @@ function packOrderDetails(fields: [string, string | number][]) {
 }
 
 // Same wording as the app, e.g. "Bat Name (Size: L, Color: Red x1)".
-function summaryLine(item: { name: string; size: string; color?: string; quantity: number }) {
+// A designed shirt also links its finished pictures, so the app's admin screen can see the design too.
+function summaryLine(item: { name: string; size: string; color?: string; quantity: number; custom?: CustomShirt }) {
   const options = [
     item.size !== "One size" ? `Size: ${item.size}` : "",
     item.color ? `Color: ${item.color}` : "",
   ].filter(Boolean)
-  return `${item.name} (${options.length ? `${options.join(", ")} ` : ""}x${item.quantity})`
+  const line = `${item.name} (${options.length ? `${options.join(", ")} ` : ""}x${item.quantity})`
+  if (!item.custom) return line
+  const pictures = [item.custom.preview.front, item.custom.preview.back].filter(Boolean).join(" | ")
+  return `${line} Design: ${pictures}`
 }
 
 const popularCities = [
@@ -75,7 +79,7 @@ const popularCities = [
 
 export default function CheckoutPage() {
   const navigate = useNavigate()
-  const { products, bag, bagTotal, clearBag, setLastOrder, removeFromBag } =
+  const { bag, bagTotal, clearBag, setLastOrder, removeFromBag } =
     useOutletContext<StorefrontContext>()
 
   const [formData, setFormData] = useState({
@@ -177,7 +181,7 @@ export default function CheckoutPage() {
 
     const orderItems = bag
       .map((item) => {
-        const product = products.find((p) => p.id === item.id)
+        const product = findProduct(item.id)
         if (!product) return null
         return {
           id: product.id,
@@ -187,6 +191,7 @@ export default function CheckoutPage() {
           size: item.size,
           color: item.color,
           quantity: item.quantity,
+          custom: item.custom,
         }
       })
       .filter((item): item is NonNullable<typeof item> => item !== null)
@@ -214,17 +219,43 @@ export default function CheckoutPage() {
         paymentProof = supabase.storage.from("products").getPublicUrl(path).data.publicUrl
       }
 
+      // Designed shirts: save the full design next to the order (custom-orders/<order id>.json) so the
+      // admin panel can show every uploaded file and the finished pictures. Done first so it is never missing.
+      const customItems = orderItems.filter((item) => item.custom)
+      if (customItems.length) {
+        const manifest = {
+          orderId,
+          createdAt: new Date().toISOString(),
+          items: customItems.map((item) => ({
+            name: item.name,
+            size: item.size,
+            quantity: item.quantity,
+            ...item.custom,
+          })),
+        }
+        const saved = await supabase.storage
+          .from("products")
+          .upload(`custom-orders/${orderId}.json`, new Blob([JSON.stringify(manifest, null, 2)], { type: "application/json" }), {
+            contentType: "application/json",
+          })
+        if (saved.error) throw saved.error
+      }
+
       // Same stock as the app: reserve the whole bag in one go, or nothing if any line ran out.
-      const stock = await supabase.rpc("verify_and_decrement_cart_stock", {
-        p_items: orderItems.map((item) => ({
-          product_id: item.id,
-          quantity: item.quantity,
-          size: item.size === "One size" ? "" : item.size,
-        })),
-      })
+      // Designed shirts are made to order, so they have no stock to reserve.
+      const stockItems = orderItems.filter((item) => !item.custom)
+      const stock = stockItems.length
+        ? await supabase.rpc("verify_and_decrement_cart_stock", {
+            p_items: stockItems.map((item) => ({
+              product_id: item.id,
+              quantity: item.quantity,
+              size: item.size === "One size" ? "" : item.size,
+            })),
+          })
+        : { data: { success: true }, error: null }
       if (stock.error) throw stock.error
       if (!stock.data?.success) {
-        const short = products.find((p) => p.id === stock.data?.product_id)
+        const short = findProduct(stock.data?.product_id)
         if (short) short.stock = Math.max(0, Number(stock.data?.available) || 0)
         setSubmitError(
           `${stock.data?.message || "An item in your bag just sold out."} Please update your bag and try again.`,
@@ -232,8 +263,8 @@ export default function CheckoutPage() {
         setSubmitting(false)
         return
       }
-      for (const item of orderItems) {
-        const product = products.find((p) => p.id === item.id)
+      for (const item of stockItems) {
+        const product = findProduct(item.id)
         if (product) product.stock = Math.max(0, product.stock - item.quantity)
       }
 
@@ -662,7 +693,7 @@ export default function CheckoutPage() {
                 {/* ── Product cards ── */}
                 <div className="space-y-6 max-h-[420px] overflow-y-auto pr-1">
                   {bag.map((item) => {
-                    const product = products.find((p) => p.id === item.id)
+                    const product = findProduct(item.id)
                     if (!product) return null
                     return (
                       <div

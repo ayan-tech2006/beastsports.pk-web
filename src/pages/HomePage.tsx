@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router"
 import BatHero from "@/components/BatHero"
 import BatRack from "@/components/BatRack"
+import DesignCards from "@/components/DesignCards"
 import ClothingRail from "@/components/ClothingRail"
 import TiltCarousel, {
   type TiltCarouselImage,
@@ -48,6 +49,7 @@ export default function HomePage() {
       </section>
       <ClothingRail />
       <BatRack />
+      <DesignCards />
     </>
   )
 }

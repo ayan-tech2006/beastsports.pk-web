@@ -14,7 +14,7 @@ import { getProductDetails } from "@/lib/product-details"
 import { useScrollReveal } from "@/lib/reveal"
 import "./storefront.css"
 
-import { allProducts, collectionRoots, collectionsById, homeContent, type Collection, getProductImageUrl, type Product as ProductType, type SportCategory, money } from "@/data/products"
+import { allProducts, collectionRoots, collectionsById, findProduct, homeContent, registerCustomShirt, type Collection, type CustomShirt, getProductImageUrl, type Product as ProductType, type SportCategory, money } from "@/data/products"
 
 type Category = "All" | "Men" | "Women" | "Equipment" | "Accessories"
 export type Product = ProductType
@@ -23,6 +23,7 @@ export type BagItem = {
   size: string
   quantity: number
   color?: string
+  custom?: CustomShirt // a shirt from "Design your own shirt" (its id starts with "custom-")
 }
 // Same choices as the app's checkout.
 export type PaymentMethod = "Cash on Delivery" | "Easypaisa" | "JazzCash" | "Bank transfer"
@@ -74,6 +75,7 @@ export type StorefrontContext = {
   openBag: () => void
   helpTopic: (title: string) => void
   addToBag: (product: Product, size?: string, color?: string) => void
+  addCustomShirt: (shirt: CustomShirt, size: string, quantity: number) => void
   changeQuantity: (id: string, size: string, amount: number, color?: string) => void
   removeFromBag: (id: string, size: string, color?: string) => void
   clearBag: () => void
@@ -85,7 +87,7 @@ const products: Product[] = allProducts
 
 // How many more of a product fit in the bag before it passes the stock.
 export function roomFor(id: string, bag: BagItem[]) {
-  const stock = products.find((p) => p.id === id)?.stock ?? 0
+  const stock = findProduct(id)?.stock ?? 0
   const inBag = bag.reduce((sum, item) => (item.id === id ? sum + item.quantity : sum), 0)
   return Math.max(0, stock - inBag)
 }
@@ -145,7 +147,7 @@ const showDeal = Boolean(deal && dealProduct && Date.parse(deal.endsAt) > Date.n
 const image = (name: string) => getProductImageUrl(name)
 
 function bagColor(item: Pick<BagItem, "id" | "color">) {
-  const product = products.find((product) => product.id === item.id)
+  const product = findProduct(item.id)
   if (item.color || !product) return item.color
   return getProductDetails(product).colors[0]?.name
 }
@@ -298,8 +300,10 @@ export default function Storefront() {
   const [bag, setBag] = useState<BagItem[]>(() => {
     if (typeof window === "undefined") return []
     try {
-      const stored = localStorage.getItem("beast_sports_bag")
-      return stored ? JSON.parse(stored) : []
+      const stored: BagItem[] = JSON.parse(localStorage.getItem("beast_sports_bag") || "[]")
+      stored.forEach((item) => item.custom && registerCustomShirt(item.id, item.custom, item.size))
+      // Drop lines whose product was removed from the shop since they were added.
+      return stored.filter((item) => findProduct(item.id))
     } catch {
       return []
     }
@@ -326,7 +330,7 @@ export default function Storefront() {
   const bagTotal = bag.reduce(
     (sum, item) =>
       sum +
-      (products.find((product) => product.id === item.id)?.price ?? 0) *
+      (findProduct(item.id)?.price ?? 0) *
         item.quantity,
     0,
   )
@@ -436,6 +440,15 @@ export default function Storefront() {
     productDialog.current?.close()
     flyToCart(image(product.image))
     setNotice(`${product.name} added to your bag.`)
+  }
+
+  // A designed shirt is its own bag line (each design is unique), with its finished picture as the image.
+  function addCustomShirt(shirt: CustomShirt, size: string, quantity: number) {
+    const id = `custom-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+    registerCustomShirt(id, shirt, size)
+    setBag((current) => [...current, { id, size, quantity, color: shirt.colorName, custom: shirt }])
+    flyToCart(shirt.preview.front)
+    setNotice(`Your custom ${shirt.style} was added to your bag.`)
   }
 
   function removeFromBag(id: string, size: string, color?: string) {
@@ -575,6 +588,7 @@ export default function Storefront() {
               openBag: () => bagDialog.current?.showModal(),
               helpTopic,
               addToBag,
+              addCustomShirt,
               changeQuantity,
               removeFromBag,
               clearBag,
@@ -1067,9 +1081,7 @@ export default function Storefront() {
             <>
               <div className="bag-items">
                 {bag.map((item) => {
-                  const product = products.find(
-                    (product) => product.id === item.id,
-                  )!
+                  const product = findProduct(item.id)!
                   return (
                     <article
                       className="bag-item"

@@ -23,6 +23,7 @@ import SizeGuidePage from "@/pages/SizeGuidePage"
 
 // Phase 4: Discovery & Catalogs
 import CollectionsPage from "@/pages/CollectionsPage"
+import ShirtDesignerPage from "@/pages/ShirtDesignerPage"
 
 function NotFoundPage() {
   return (
@@ -64,6 +65,7 @@ export const router = createHashRouter([
       { index: true, Component: HomePage },
       { path: "shop", Component: ShopPage },
       { path: "product/:productId", Component: ProductPage },
+      { path: "design/shirt", Component: ShirtDesignerPage },
 
       // Phase 1: Order Flow
       { path: "cart", Component: CartPage },

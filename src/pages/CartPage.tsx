@@ -10,11 +10,11 @@ import {
   Truck,
 } from "lucide-react"
 import { roomFor, type StorefrontContext } from "@/Storefront"
-import { deliveryCharge, getProductImageUrl, money } from "@/data/products"
+import { deliveryCharge, findProduct, getProductImageUrl, money } from "@/data/products"
 import { getProductDetails } from "@/lib/product-details"
 
 export default function CartPage() {
-  const { products, bag, bagTotal, changeQuantity, removeFromBag } =
+  const { bag, bagTotal, changeQuantity, removeFromBag } =
     useOutletContext<StorefrontContext>()
 
   const ids = bag.map((item) => item.id)
@@ -92,7 +92,7 @@ export default function CartPage() {
               {/* Items List */}
               <div className="divide-y divide-[rgb(56_28_16_/_10%)] rounded-2xl border border-[rgb(56_28_16_/_12%)] bg-white shadow-xs">
                 {bag.map((item) => {
-                  const product = products.find((p) => p.id === item.id)
+                  const product = findProduct(item.id)
                   if (!product) return null
                   const details = getProductDetails(product)
                   const itemColor = item.color || details.colors[0]?.name || "Standard"

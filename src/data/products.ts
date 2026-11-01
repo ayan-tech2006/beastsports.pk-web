@@ -66,7 +66,7 @@ export const money = (price: number) =>
 // shortcut: charged per line, not per unit (app orders seen so far are all x1); confirm with the app's checkout code.
 export function deliveryCharge(ids: string[], agency: "Post Office" | "TCS") {
   return ids.reduce((sum, id) => {
-    const product = allProducts.find((p) => p.id === id)
+    const product = findProduct(id)
     if (!product) return sum
     return sum + (agency === "TCS" ? product.delivery.tcs : product.delivery.postOffice)
   }, 0)
@@ -74,6 +74,55 @@ export function deliveryCharge(ids: string[], agency: "Post Office" | "TCS") {
 
 // Filled once by loadProducts() before the app renders (see main.tsx).
 export const allProducts: Product[] = []
+
+// ===== Custom shirts from "Design your own shirt" =====
+// They live only in the bag (never in the shop), so the bag, cart and checkout find them here.
+export type CustomDesign = {
+  side: "front" | "back"
+  kind: "img" | "text"
+  src?: string // uploaded file or ready-made design (stored URL)
+  text?: string
+  font?: string
+  color?: string
+  x: number
+  y: number
+  scale: number
+  rotate: number
+}
+export type CustomShirt = {
+  style: string
+  colorName: string
+  colorHex: string
+  unitPrice: number
+  printedSides: number
+  preview: { front: string; back: string } // the finished full-shirt pictures
+  designs: CustomDesign[]
+  delivery: { postOffice: number; tcs: number }
+}
+export const customProducts = new Map<string, Product>()
+
+export function registerCustomShirt(id: string, shirt: CustomShirt, size: string) {
+  customProducts.set(id, {
+    id,
+    name: `Custom ${shirt.style}`,
+    category: "Men",
+    sport: "Sportswear",
+    type: "Custom shirt",
+    price: shirt.unitPrice,
+    image: shirt.preview.front,
+    sizes: [size],
+    description: "Designed by you on BeastSports.",
+    colors: [shirt.colorName],
+    gallery: shirt.preview.back ? [shirt.preview.back] : [],
+    rating: 0,
+    reviewsCount: 0,
+    stock: 99,
+    delivery: shirt.delivery,
+    collectionNames: [],
+  })
+}
+
+export const findProduct = (id: string) => allProducts.find((p) => p.id === id) ?? customProducts.get(id)
 
 type ProductRow = {
   id: string
@@ -248,13 +297,34 @@ export type RailEntry = { on: boolean; front: string; back: string }
 // 3D bat rack entries, keyed by product id; the type decides how edges and toe are drawn.
 export type BatEntry = { on: boolean; type: "hardball" | "holes" | "plain"; front: string; back: string }
 
+// "Design your own shirt" settings from the admin's Shirt Designer screen (same shape as the admin panel).
+export type PrintArea = { x: number; y: number; w: number; h: number } // % of the 400×480 frame
+export type ShirtStyle = {
+  id: string
+  label: string
+  price: number
+  front: string
+  back: string
+  printFront: PrintArea
+  printBack: PrintArea
+}
+export type ShirtDesigner = {
+  enabled: boolean
+  styles: ShirtStyle[]
+  colors: { name: string; hex: string }[]
+  sizes: string[]
+  printPrice: number
+  delivery: { postOffice: number; tcs: number }
+}
+
 export const homeContent: {
   heroSlides: HeroSlide[]
   featureCards: FeatureCard[]
   deal: WebDeal | null
   rail: Record<string, RailEntry>
   bats: Record<string, BatEntry>
-} = { heroSlides: [], featureCards: [], deal: null, rail: {}, bats: {} }
+  designer: ShirtDesigner | null
+} = { heroSlides: [], featureCards: [], deal: null, rail: {}, bats: {}, designer: null }
 
 const HOME_KEYS = {
   hero: "web_hero_slides_json",
@@ -262,6 +332,7 @@ const HOME_KEYS = {
   deal: "web_deal_json",
   rail: "web_rail_json",
   bats: "web_bat_rack_json",
+  designer: "web_shirt_designer_json",
 }
 
 function parseSetting<T>(rows: { key: string; value: string | null }[], key: string, fallback: T): T {
@@ -309,4 +380,10 @@ export async function loadProducts() {
   homeContent.deal = parseSetting<WebDeal | null>(settings, HOME_KEYS.deal, null)
   homeContent.rail = parseSetting<Record<string, RailEntry>>(settings, HOME_KEYS.rail, {})
   homeContent.bats = parseSetting<Record<string, BatEntry>>(settings, HOME_KEYS.bats, {})
+  // The designer opens only when the admin switched it on and gave it at least one shirt photo.
+  const designer = parseSetting<ShirtDesigner | null>(settings, HOME_KEYS.designer, null)
+  homeContent.designer =
+    designer?.enabled && designer.styles?.some((s) => s.front) && designer.colors?.length && designer.sizes?.length
+      ? { ...designer, styles: designer.styles.filter((s) => s.front) }
+      : null
 }
